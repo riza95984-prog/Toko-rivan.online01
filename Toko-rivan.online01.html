@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rivan Store Online</title>
+<style>
+body{font-family:Arial;margin:0;background:#111;color:#eee}
+header{background:#000;color:white;padding:15px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:20px}
+.container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;padding:20px}
+.card{background:#1c1c1c;border-radius:10px;padding:15px;box-shadow:0 4px 10px rgba(0,0,0,0.5);text-align:center}
+.card img{width:100%;height:150px;object-fit:cover;border-radius:8px}
+button{border:none;padding:10px 14px;border-radius:6px;cursor:pointer}
+.add{background:#000;color:white;margin-top:10px;width:100%}
+.cartBtn{background:white;color:black}
+.adminBtn{background:#333;color:white;width:100%;margin-top:6px}
+.deleteBtn{background:#7a0000;color:white;width:100%;margin-top:5px}
+.cart{position:fixed;right:0;top:0;width:300px;height:100%;background:#1a1a1a;box-shadow:-4px 0 10px rgba(0,0,0,0.5);padding:20px;overflow:auto;display:none}
+.cart h2{margin-top:0}
+input{width:100%;padding:8px;margin:6px 0;background:#222;border:1px solid #444;color:white}
+.admin{background:#1a1a1a;margin:20px;padding:15px;border-radius:10px}
+.checkout{background:#000;color:white;width:100%;margin-top:10px}
+.login{background:#1a1a1a;margin:20px;padding:15px;border-radius:10px}
+.hidden{display:none}
+</style>
+</head>
+<body><header>
+<h1>Rivan Store Online</h1>
+<button class="cartBtn" onclick="toggleCart()">🛒 Keranjang</button>
+</header><div class="login" id="loginBox">
+<h3>Login Admin</h3>
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+<button class="adminBtn" onclick="login()">Login</button>
+</div><div class="admin hidden" id="adminPanel">
+</div><div class="container" id="products"></div><div class="cart" id="cart">
+<h2>Keranjang Belanja</h2>
+<ul id="cartList"></ul>
+<p>Total: Rp <span id="total">0</span></p>
+<button class="checkout" onclick="checkoutWA()">Checkout WhatsApp</button>
+</div><script>
+let products = JSON.parse(localStorage.getItem('products')) || [
+{name:'Web Nokos all Negara',price:2000,image:'https://drive.google.com/file/d/1548SOJK75sorwBMA56sxh1F-0KOO_2cb/view?usp=drivesdk,
+{name:'Nokos Indonesia',price:3500,image:'https://drive.google.com/file/d/1UPWHSNdFgzhsDGXJwboF-eakB8BPY0HL/view?usp=drivesdk'},
+{name:'Logo Teks',price:1200,image:'https://drive.google.com/file/d/1sNdXGlTdXr-T_Z4XHf3MuRZv_cXJ9pUF/view?usp=drivesdk'}
+]
+
+let cart=[]
+
+const adminUser="admin"
+const adminPass="12345"
+
+function save(){
+localStorage.setItem('products',JSON.stringify(products))
+}
+
+function render(){
+const container=document.getElementById('products')
+container.innerHTML=''
+
+products.forEach((p,i)=>{
+container.innerHTML+=`<div class="card">
+<img src="${p.image}">
+<h3>${p.name}</h3>
+<p>Rp ${p.price}</p>
+<button class="add" onclick="addCart(${i})">Tambah ke Keranjang</button>
+${isAdmin?`<button class="deleteBtn" onclick="deleteProduct(${i})">Hapus Produk</button>`:''}
+</div>`
+})
+}
+
+function addProduct(){
+const name=document.getElementById('name').value
+const price=parseInt(document.getElementById('price').value)
+const image=document.getElementById('image').value
+
+if(!name||!price||!image){
+alert('Isi semua data produk')
+return
+}
+
+products.push({name,price,image})
+save()
+render()
+}
+
+function deleteProduct(i){
+products.splice(i,1)
+save()
+render()
+}
+
+function addCart(i){
+cart.push(products[i])
+updateCart()
+}
+
+function updateCart(){
+const list=document.getElementById('cartList')
+list.innerHTML=''
+let total=0
+
+cart.forEach(p=>{
+list.innerHTML+=`<li>${p.name} - Rp ${p.price}</li>`
+ total+=p.price
+})
+
+document.getElementById('total').innerText=total
+}
+
+function toggleCart(){
+const cartBox=document.getElementById('cart')
+cartBox.style.display = cartBox.style.display==='block' ? 'none':'block'
+}
+
+function checkoutWA(){
+let text='Halo admin, saya mau pesan:%0A'
+let total=0
+
+cart.forEach(p=>{
+text+=`${p.name} - Rp ${p.price}%0A`
+ total+=p.price
+})
+
+text+=`Total: Rp ${total}`
+
+window.open(`https://wa.me/6283141471408?text=${text}`)
+}
+
+let isAdmin=false
+
+function login(){
+const u=document.getElementById('username').value
+const p=document.getElementById('password').value
+
+if(u===adminUser && p===adminPass){
+isAdmin=true
+
+document.getElementById('adminPanel').classList.remove('hidden')
+document.getElementById('loginBox').classList.add('hidden')
+
+render()
+}else{
+alert('Login salah')
+}
+}
+
+render()
+</script></body>
+</html>
